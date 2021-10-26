@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>購物系統</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .navbar {
+            margin-bottom: 0;
+            border-radius: 0;
+        }
+
+        /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+        .row.content {
+            height: 1000px
+        }
+
+        /* Set gray background color and 100% height */
+        .sidenav {
+            padding-top: 20px;
+            background-color: #f1f1f1;
+            height: 100%;
+        }
+
+        /* Set black background color, white text and some padding */
+        footer {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        @media screen and (max-width: 767px) {
+            .sidenav {
+                height: auto;
+                padding: 15px;
+            }
+
+            .row.content {
+                height: auto;
+            }
+        }
+
+        img {
+            width: 120px;
+            height: 120px;
+            border-radius: 15px;
+            margin: 5px 5px;
+            border: 1px solid black;
+        }
+
+        .im {
+            width: 100px;
+            height: 100px;
+        }
+
+        .bt {
+            border-right: 0px;
+            border-left: 0px;
+            border-bottom: 0px;
+        }
+
+        label {
+            font-size: 8px;
+            margin-left: 5px
+        }
+
+        body {
+            background-color: #FFEEDD;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/store">首頁</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav navbar-right">
+                    <li id="i1">
+                        <a href="#"><i class="glyphicon glyphicon-list-alt"></i>&nbsp訂單管理</a>
+                    </li>
+                    <li id="i2">
+                        <a href="#"><i class="glyphicon glyphicon-cog"></i>&nbsp商品管理</a>
+                    </li>
+                    <li id="i3">
+                        <a href="#"><span class="glyphicon glyphicon-user"></span>&nbsp<%= user%></a>
+                    </li>
+                    <li>
+                        <a href="/logout"><span class="glyphicon glyphicon-log-in"></span> 登出</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <span id="sp1" style="display:none"><%= user%></span>
+    
+    <div class="container-fluid text-center">
+        <div class="row content">
+            <div class="col-sm-1 ">
+            </div>
+            <div class="col-sm-7 text-left sidenav" style="border:3px solid red;border-radius:10px;margin-top:10px">
+                <h1 align="center" style="color:red">商品</h1>
+                <table id="tb1" style="margin:0px;"></table>
+            </div>
+
+            <div class="col-sm-3 text-left sidenav  container" align="center" style="border:3px solid red;width:360px;border-radius:10px;margin-left:10px;margin-top:10px">
+                <h1 align="center" style="color:red">購物車</h1>
+                <table id="tb2" style="margin:0px;"></table>
+            </div>
+            <div class="col-sm-1 ">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*訂單管理*/
+        document.getElementById('i1').addEventListener('click', function () {
+            window.location.href = '/store/order';
+        })
+        /*商品管理*/
+        document.getElementById('i2').addEventListener('click', function () {
+            window.location.href = '/store/commodity';
+        })
+        /*修改會員資料*/
+        document.getElementById('i3').addEventListener('click', function () {
+            window.open('/store/edit', '修改會員資料', config = 'height=650,width=500,scrollbars=no,resizable=no,location=no,menubar=no,status=no');
+        })
+
+        /*$(document).ready(function () {*/
+        $(function () {
+
+            /*商品*/
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:3000/sql/commodity',
+            }).done(function (result) {
+                console.log("商品:",result)
+                var num = 0;
+                var str = '';
+                result.forEach(function (data) {
+                    if (num == 0) {
+                        str += '<tr>';
+                    } else if (num % 5 == 0) {
+                        str += '</tr><tr>';                       
+                    }
+                    num = num + 1;
+                  //str += '<td id="t' + data['c_id'] + '" onclick="c(' + data['c_id'] + ')"><img src="./images/' + data['c_img'] + '" ><br><label>商品名稱：' + data['c_name'] + '</label><br><input type="text" style="display:none" id="n' + data['c_id'] + '" value="' + data['c_amount'] + '"><label>庫存量：</label><label id="l' + data['c_id'] + '">' + data['c_amount'] + '</label><p style="color:red;float:right;display:inline;margin-right:10px">$' + data['price'] + '</p></td>';
+                    str += '<td id="t' + data['c_id'] + '" onclick="add(' + data['c_id'] + ')"> <img src="./images/' + data['c_img'] + '"><br>';                  
+                    str += '<label>商品名稱：</label><label style ="color:red">' + data['c_name'] + '</label><br>';      
+                    str += '<label>庫存量：</label><label style ="color:red" id="l' + data['c_id'] + '">' + data['c_amount'] + '</label><br>';
+                    str += '<lable>價格：</lable><lable style="color:red">NT$&nbsp' + data['price'] + '</lable> <br>';
+                    str += '<input type ="text" style="display:none" id ="n' + data['c_id'] + '" value = "' + data['c_amount'] + '"></td>';
+                    if (num == result.length) {
+                        str += '</tr>';
+                    }
+                })
+                console.log('str:',str)
+                $("#tb1").html(str)
+            }).fail(function (err) {
+                console.log(err.statusText);
+            })
+
+            /*購物車*/
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:3000/sql/shopping_cart'
+            }).done(function (result) {
+                console.log("購物車:", result)
+                var total = 0;
+                var num1 = 0;
+                var str1 = '';
+                if (result.length != 0) {
+                    result.forEach(function (data) {
+                        total = total + (data['num'] * data['price']);
+                        if (num1 == 0) {
+                            str1 += '<tr>';
+                        } else if (num1 % 3 == 0) {
+                            str1 += '</tr><tr>';
+                        }
+                        num1 = num1 + 1;
+                        str1 += '<td onclick="reduce(' + data['id_commodity'] + ')"><img class="im" src="./images/' + data['c_img'] + '"><br>';
+                        str1 += '<label>商品名稱：</label><label style ="color:red">' + data['c_name'] + '</label><br>';
+                        str1 += '<label>單價：</label><label style ="color:red">NT$&nbsp' + data['price'] + '</label><br>';
+                        str1 += '<label>數量：</label><label style="color:red" id="r' + data['id_commodity'] + '">' + data['num'] + '</label></td>';
+                        if (num1 == result.length) {
+                            str1 += '</tr>';
+                        }
+                    })
+                    str1 += "<tr><td class='bt' colspan='4' align='center'><h4 style='color:red'>總價格：NT$&nbsp" + total + "</h4><a href='/store/buy'><button class='btn btn-success btn-lg'><i class='glyphicon glyphicon - usd'>購買</button></a></td></tr>";
+                    $("#tb2").html(str1);
+                } else {
+                    str1 = '<tr><td ><h3>您的購物車目前沒有商品</h3></td></tr>';
+                    $("#tb2").html(str1);
+                }
+            }).fail(function (err) {
+                console.log(err.statusText);
+            })
+        });
+
+        /*點選商品+1*/
+        function add(a) {
+            var t = $('#n' + a).val();
+            if (t != 0) {
+                t = t - 1;
+                $('#n' + a).val(t);
+                $('#l' + a).html(t);
+                var user = {
+                    c_id: a
+                }
+                $.ajax({
+                    type: 'post',
+                    url: 'http://localhost:3000/sql/add_shopping_cart',
+                    data: user
+                }).done(function (result) {
+                    console.log('add_shopping_cart=',result)
+                    var total = 0;
+                    var num1 = 0;
+                    var str1 = '';
+                    if (result.length != 0) {
+                        result.forEach(function (data) {
+                            data['num'] = Number(data['num'])
+                            data['price'] = Number(data['price'])
+                            total = total + (data['num'] * data['price']);
+                            if (num1 == 0) {
+                                str1 += '<tr>';
+                            } else if (num1 % 3 == 0) {
+                                str1 += '</tr><tr>';
+                            }
+                            num1 = num1 + 1;
+                            str1 += '<td onclick="reduce(' + data['id_commodity'] + ')"><img class="im" src="./images/' + data['c_img'] + '"><br>';
+                            str1 += '<label>商品名稱：</label><label style ="color:red">' + data['c_name'] + '</label><br>';
+                            str1 += '<label>單價：</label><label style ="color:red">NT$&nbsp' + data['price'] + '</label><br>';
+                            str1 += '<label>數量：</label><label style="color:red" id="r' + data['id_commodity'] + '">' + data['num'] + '</label></td>';
+                            if (num1 == result.length) {
+                                str1 += '</tr>';
+                            }
+                        })
+                        str1 += "<tr><td class='bt' colspan='4' align='center'><h4 style='color:red'>總價格：NT$&nbsp" + total + "</h4><a href='/store/buy'><button class='btn btn-success btn-lg'><i class='glyphicon glyphicon - usd'>購買</button></a></td></tr>";
+                        $("#tb2").html(str1);
+                        console.log('str1=', str1)
+                    } else {
+                        str1 = '<tr><td><h3 align="center">您的購物車目前沒有商品</h3></td></tr>';
+                        $("#tb2").html(str1);                        
+                    }
+                }).fail(function (err) {
+                    console.log(err.statusText);
+                })
+            }
+        }
+
+        /*點選商品-1*/
+        function reduce(a) {
+            var t = $("#n" + a).val()
+            t = parseInt(t) + 1;
+            $("#n" + a).val(t);
+            $("#l" + a).html(t);
+
+            var user = {
+                c_id: a,
+                num: $("#r" + a).html()
+            }
+            $.ajax({
+                type: 'post',
+                url: 'http://localhost:3000/sql/reduce_shopping_cart',
+                data: user
+            }).done(function (result) {
+                var total = 0;
+                var num1 = 0;
+                var str1 = '';
+                if (result.length != 0) {
+                    result.forEach(function (data) {
+                        total = total + (data['num'] * data['price']);
+                        if (num1 == 0) {
+                            str1 += '<tr>';
+                        } else if (num1 % 3 == 0) {
+                            str1 += '</tr><tr>';
+                        }
+                        num1 = num1 + 1;
+                        str1 += '<td onclick="reduce(' + data['id_commodity'] + ')"><img class="im" src="./images/' + data['c_img'] + '"><br>';
+                        str1 += '<label>商品名稱：</label><label style ="color:red">' + data['c_name'] + '</label><br>';
+                        str1 += '<label>單價：</label><label style ="color:red">NT$&nbsp' + data['price'] + '</label><br>';
+                        str1 += '<label>數量：</label><label style="color:red" id="r' + data['id_commodity'] + '">' + data['num'] + '</label></td>';
+                        if (num1 == result.length) {
+                            str1 += '</tr>';
+                        }
+                    })
+                    str1 += "<tr><td class='bt' colspan='4' align='center'><h4 style='color:red'>總價格：NT$&nbsp" + total + "</h4><a href='/store/buy'><button class='btn btn-success btn-lg'><i class='glyphicon glyphicon - usd'>購買</button></a></td></tr>";
+                    $("#tb2").html(str1);
+                } else {
+                    str1 = '<tr><td><h3 align="center">您的購物車目前沒有商品</h3></td></tr>';
+                    $("#tb2").html(str1);
+                }
+            }).fail(function (err) {
+                console.log(err.statusText);
+            })
+        }
+    </script>
+</body>
+</html>
